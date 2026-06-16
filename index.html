@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Orquestração Cognitiva • Relatório IA 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #080e1a;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #e2e8f0;
+            line-height: 1.6;
+            padding: 1.5rem;
+            overflow-x: hidden;
+        }
+
+        /* --- Fundo Dinâmico (Malha e Mesh) --- */
+        .bg-mesh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background:
+                radial-gradient(circle at 15% 30%, rgba(59, 130, 246, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 85% 70%, rgba(139, 92, 246, 0.10) 0%, transparent 45%),
+                radial-gradient(circle at 50% 100%, rgba(6, 182, 212, 0.06) 0%, transparent 40%),
+                #080e1a;
+            animation: meshPulse 12s ease-in-out infinite alternate;
+        }
+
+        @keyframes meshPulse {
+            0% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.08); }
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 70px 70px;
+            pointer-events: none;
+        }
+
+        /* --- Barra de Progresso --- */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+            width: 0%;
+            z-index: 999;
+            transition: width 0.1s;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+        }
+
+        /* --- Container Principal --- */
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- Glassmorphism Base --- */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 28px;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.8);
+        }
+
+        /* --- Header --- */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 100px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.3));
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #c4b5fd, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .header-badge {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .badge-tech {
+            background: rgba(96, 165, 250, 0.1);
+            border: 1px solid rgba(96, 165, 250, 0.15);
+            padding: 0.3rem 1.2rem;
+            border-radius: 60px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #93bbfc;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+
+        .badge-tech span {
+            color: #e2e8f0;
+        }
+
+        /* --- Hero --- */
+        .hero {
+            padding: 2.5rem 2.8rem 3rem;
+            margin-bottom: 3.5rem;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -20%;
+            width: 60%;
+            height: 120%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.06), transparent 70%);
+            animation: heroGlow 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes heroGlow {
+            0% { transform: translateX(-10%) scale(1); opacity: 0.5; }
+            100% { transform: translateX(30%) scale(1.3); opacity: 1; }
+        }
+
+        .hero h2 {
+            position: relative;
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.2rem;
+            letter-spacing: -0.03em;
+            z-index: 2;
+        }
+
+        .hero .gradient-text {
+            background: linear-gradient(135deg, #a78bfa, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            position: relative;
+            z-index: 2;
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 1.5rem;
+            color: #9aaec9;
+        }
+
+        .hero-tags {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-tag {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.3rem 1.4rem;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #94a3b8;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: 0.2s;
+        }
+
+        .hero-tag:hover {
+            border-color: #3b82f6;
+            color: #e2e8f0;
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        .hero-tag .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3b82f6;
+            display: inline-block;
+            animation: pulseDot 2s infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
+
+        /* --- Seções e Animações Scroll --- */
+        section {
+            margin-bottom: 4rem;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1), transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            letter-spacing: -0.02em;
+        }
+
+        .section-title .emoji {
+            font-size: 2rem;
+        }
+
+        .section-title .accent-line {
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.4), transparent);
+            margin-left: 0.5rem;
+        }
+
+        .section-sub {
+            color: #94a3b8;
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-top: 2.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        h3 .badge-lab {
+            font-size: 0.65rem;
+            font-weight: 600;
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            padding: 0.1rem 0.8rem;
+            border-radius: 40px;
+            letter-spacing: 0.3px;
+        }
+
+        /* --- Cards Grid --- */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.8rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 1.5rem 1.8rem;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(59, 130, 246, 0.25);
+            box-shadow: 0 20px 40px -16px rgba(59, 130, 246, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 0.6rem;
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            margin-bottom: 0.4rem;
+        }
+
+        .card strong {
+            color: #e2e8f0;
+        }
+
+        .card .badge {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 0.15rem 0.7rem;
+            border-radius: 40px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            background: #2563eb;
+            color: white;
+            margin-right: 0.3rem;
+        }
+
+        .card .badge-warn {
+            background: #b45309;
+        }
+
+        .card .badge-alt {
+            background: #475569;
+        }
+
+        .card .badge-open {
+            background: #059669;
+        }
+
+        /* --- Destaque (Highlight Box) --- */
+        .highlight-box {
+            background: rgba(59, 130, 246, 0.06);
+            border-left: 6px solid #3b82f6;
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
+            margin: 1.8rem 0;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 0 30px -12px rgba(59, 130, 246, 0.08);
+        }
+
+        .highlight-box strong {
+            color: #f1f5f9;
+        }
+
+        .highlight-box ol {
+            margin-left: 1.2rem;
+        }
+
+        /* --- Tabelas Modernas --- */
+        .table-wrap {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            overflow: hidden;
+            margin: 1.2rem 0;
+        }
+
+        .table-wrap table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .table-wrap th {
+            text-align: left;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            color: #94a3b8;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .table-wrap td {
+            padding: 0.9rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: #cbd5e1;
+        }
+
+        .table-wrap tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-wrap tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .table-wrap .highlight-row td {
+            background: rgba(59, 130, 246, 0.06);
+            border-left: 3px solid #3b82f6;
+        }
+
+        /* --- Índice (TOC) --- */
+        .toc {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 1.8rem 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .toc ul {
+            list-style: none;
+            columns: 2 220px;
+            column-gap: 2rem;
+        }
+
+        .toc li {
+            margin-bottom: 0.4rem;
+            padding: 0.2rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .toc a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .toc a:hover {
+            color: #60a5fa;
+            padding-left: 6px;
+        }
+
+        /* --- Tags de sistema agentivo --- */
+        .tag-sys {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 0.1rem 0.6rem;
+            border-radius: 30px;
+            background: rgba(6, 182, 212, 0.12);
+            color: #67e8f9;
+            border: 1px solid rgba(6, 182, 212, 0.1);
+        }
+
+        /* --- Custo Tags --- */
+        .cost-high { color: #f87171; }
+        .cost-medium { color: #fbbf24; }
+        .cost-low { color: #34d399; }
+
+        /* --- HR --- */
+        hr {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            margin: 2.5rem 0;
+        }
+
+        /* --- Footer --- */
+        .footer {
+            margin-top: 3.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        /* --- Responsivo --- */
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .header { border-radius: 40px; padding: 0.8rem 1.2rem; flex-direction: column; align-items: stretch; text-align: center; }
+            .header-badge { justify-content: center; }
+            .logo h1 { font-size: 1.2rem; }
+            .hero { padding: 1.8rem 1.2rem; }
+            .hero h2 { font-size: 2.2rem; }
+            .card-grid { grid-template-columns: 1fr; }
+            .section-title { font-size: 1.6rem; flex-wrap: wrap; }
+            .section-title .accent-line { display: none; }
+            .toc ul { columns: 1; }
+            .table-wrap th, .table-wrap td { padding: 0.6rem 0.8rem; font-size: 0.75rem; }
+            .container { padding: 0; }
+            .hero-tags { flex-direction: column; align-items: center; }
+            .badge-tech { font-size: 0.6rem; padding: 0.2rem 0.8rem; }
+            .card { padding: 1.2rem; }
+        }
+
+        @media (max-width: 480px) {
+            .hero h2 { font-size: 1.8rem; }
+            .badge-tech span { display: none; }
+        }
+
+        /* --- Scrollbar --- */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080e1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2563eb;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Fundo e Barra de Progresso -->
+    <div class="bg-mesh"></div>
+    <div class="grid-overlay"></div>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🧠</span>
+                <h1>Orquestração Cognitiva</h1>
+            </div>
+            <div class="header-badge">
+                <span class="badge-tech">📡 Relatório IA • <span>2026</span></span>
+                <span class="badge-tech">🔒 Fronteira</span>
+            </div>
+        </header>
+
+        <!-- HERO -->
+        <section class="hero">
+            <h2>
+                <span class="gradient-text">Inteligência Competitiva</span><br />
+                para Arquiteturas Agentivas
+            </h2>
+            <p>
+                Mapeamento estratégico dos modelos de linguagem, sistemas multiagentes e LAMs que definem o estado da arte em 2026.
+                Prioridade em dados validados em produção e aplicações empresariais.
+            </p>
+            <div class="hero-tags">
+                <span class="hero-tag"><span class="dot"></span> 16 de junho de 2026</span>
+                <span class="hero-tag"><span class="dot" style="background: #8b5cf6;"></span> Eng. de Sistemas Sênior</span>
+                <span class="hero-tag"><span class="dot" style="background: #06b6d4;"></span> 180 dias de evidências</span>
+            </div>
+        </section>
+
+        <!-- ÍNDICE -->
+        <div class="toc reveal">
+            <h3 style="margin-top:0; border-bottom: none; color: #e2e8f0;">📑 Navegação Rápida</h3>
+            <ul>
+                <li><a href="#sintese">1. Síntese Executiva</a></li>
+                <li><a href="#lideres">1.1 Líderes por Categoria</a></li>
+                <li><a href="#mudancas">1.2 Mudanças Estratégicas</a></li>
+                <li><a href="#impacto">1.3 Impacto LLM → LAM</a></li>
+                <li><a href="#tendencias">1.4 Tendências Emergentes</a></li>
+                <li><a href="#recomendacoes">1.5 Recomendações</a></li>
+                <li><a href="#modelos">2. Análise Detalhada</a></li>
+                <li><a href="#agentes">3. Sistemas Agentivos</a></li>
+                <li><a href="#matriz">4. Matriz de Assimetria</a></li>
+                <li><a href="#final">5. Considerações Finais</a></li>
+            </ul>
+        </div>
+
+        <!-- ========= SÍNTESE ========= -->
+        <section id="sintese">
+            <h2 class="section-title reveal">
+                <span class="emoji">📊</span> 1. Síntese Executiva
+                <span class="accent-line"></span>
+            </h2>
+
+            <h3 class="reveal" id="lideres">1.1 Líderes Absolutos por Categoria</h3>
+            <div class="table-wrap reveal">
+                <table>
+                    <thead><tr><th>Categoria</th><th>Líder</th><th>Justificativa Técnica</th></tr></thead>
+                    <tbody>
+                        <tr><td>Raciocínio e Pesquisa</td><td><strong style="color:#60a5fa;">GPT-5.5</strong> (OpenAI)</td><td>GPQA-Diamond 93,6%; referência global em tarefas científicas.</td></tr>
+                        <tr><td>Codificação e Agentes</td><td><strong style="color:#a78bfa;">Claude Opus 4.8</strong> (Anthropic)</td><td>Otimizado para fluxos agentivos e engenharia de software de longa duração.</td></tr>
+                        <tr><td>Contexto Ultralongo</td><td><strong style="color:#34d399;">Llama 4 Scout</strong> (Meta)</td><td>Janela de 10M tokens — a maior do mercado, rodando em um único H100.</td></tr>
+                        <tr><td>Custo-Benefício</td><td><strong style="color:#fbbf24;">MiniMax M2.5 Pro</strong></td><td>Custo 1/10 a 1/20 dos concorrentes; ideal para agentes em produção.</td></tr>
+                        <tr><td>Velocidade/Latência</td><td><strong style="color:#67e8f9;">Gemini 3 Flash</strong> (Google)</td><td>4× mais rápido que os líderes atuais; padrão para tempo real.</td></tr>
+                        <tr><td>Multimodalidade</td><td><strong style="color:#f472b6;">Qwen 3.7 Plus</strong> (Alibaba)</td><td>Top 5 global no Vision Arena; opera GUIs e gera código com visão.</td></tr>
+                        <tr><td>Orquestração Multiagente</td><td><strong style="color:#c4b5fd;">Kimi K2.6</strong> (Moonshot)</td><td>Arquitetura nativa para coordenar 300 subagentes em paralelo.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="reveal" id="mudancas">1.2 Principais Mudanças Estratégicas (Últimos 6 Meses)</h3>
+            <div class="card-glass reveal" style="background:rgba(255,255,255,0.02); padding:1.5rem 2rem; border-radius:24px; border:1px solid rgba(255,255,255,0.05);">
+                <ol style="margin-left:1.2rem; color:#cbd5e1;">
+                    <li><strong style="color:#e2e8f0;">Consolidação de Plataformas de Agentes:</strong> OpenAI (Frontier/Workspace Agents), Google (Gemini Enterprise Agent Platform) e Anthropic (Claude Code com dynamic workflows) lançaram plataformas empresariais, movendo o foco de "modelos isolados" para "orquestração empresarial".</li>
+                    <li><strong style="color:#e2e8f0;">Avanço dos Open-Weight Chineses:</strong> DeepSeek-V4 (1,6T MoE, 1M contexto), Qwen 3.7 Plus (multimodal híbrido) e Kimi K2.6 (300 agentes) comprovam capacidade competitiva com custo significativamente reduzido.</li>
+                    <li><strong style="color:#e2e8f0;">Corrida do Contexto Ultralongo:</strong> Llama 4 Scout (10M tokens), Gemini 2.5 Pro (2M) e GPT-5.5 (1,05M) elevam o padrão, permitindo ingestão de bases de código inteiras e livros técnicos completos.</li>
+                    <li><strong style="color:#e2e8f0;">Era dos LAMs (Large Action Models):</strong> Modelos evoluem de "responder" para "agir". Qwen 3.7 Plus (operação GUI), Claude Opus 4.8 (computer use) e GPT-5.5 (MCP/computer use) executam tarefas no mundo digital.</li>
+                    <li><strong style="color:#e2e8f0;">Maturidade dos Frameworks:</strong> LangGraph (1B+ downloads) e CrewAI (Discovery) atingiram nível empresarial, com distinções claras: Controle (LangGraph), Papéis (CrewAI) e Conversação (AutoGen).</li>
+                </ol>
+            </div>
+
+            <h3 class="reveal" id="impacto">1.3 Impacto da Evolução de LLMs para LAMs</h3>
+            <div class="highlight-box reveal">
+                <ul style="color:#cbd5e1;">
+                    <li><strong style="color:#e2e8f0;">De "Responder" para "Agir":</strong> A orquestração agora envolve execução de ações (escrever código, operar GUIs, usar ferramentas) não apenas geração de texto.</li>
+                    <li><strong style="color:#e2e8f0;">Orquestração como Moeda:</strong> O diferencial competitivo reside na capacidade de coordenar agentes (ex.: Kimi K2.6 executando 12h autônomas), não apenas no modelo base.</li>
+                    <li><strong style="color:#e2e8f0;">Agentes Persistentes:</strong> Gemini Spark (24/7 em nuvem) e agentes da Kimi demonstram operação contínua e assíncrona, redefinindo automação de processos.</li>
+                    <li><strong style="color:#e2e8f0;">Custo Viabilizador:</strong> MiniMax M2.5 Pro (US$ 0,30/1M input) e DeepSeek-V4 (open-weight) derrubam barreiras econômicas para adoção massiva de agentes.</li>
+                </ul>
+            </div>
+
+            <h3 class="reveal" id="tendencias">1.4 Tendências Emergentes (Próximos 12 Meses)</h3>
+            <ol style="color:#cbd5e1; margin-left:1.2rem;" class="reveal">
+                <li><strong style="color:#e2e8f0;">Agentes Autônomos de Longa Duração:</strong> Operação por dias/semanas com mínima supervisão (ex.: Kimi e Gemini Spark).</li>
+                <li><strong style="color:#e2e8f0;">Padronização de Contexto Massivo:</strong> 10M+ tokens se tornarão padrão para RAG e análise de repositórios.</li>
+                <li><strong style="color:#e2e8f0;">Interoperabilidade:</strong> Protocolos A2A (Agent-to-Agent) e MCP (Model Context Protocol) devem se consolidar como padrões de mercado.</li>
+                <li><strong style="color:#e2e8f0;">Governança como Diferencial:</strong> Rastreabilidade, identidade e controle de agentes (OpenAI Frontier, Gemini Enterprise) serão pré-requisitos para adoção em setores regulados.</li>
+                <li><strong style="color:#e2e8f0;">Especialização vs. Generalismo:</strong> Modelos especializados como Kimi K2.7-Code e DeepSeek-R1 competirão com generalistas (GPT-5.5) em nichos específicos de alto desempenho.</li>
+            </ol>
+
+            <h3 class="reveal" id="recomendacoes">1.5 Recomendações para Arquiteturas de Orquestração Cognitiva</h3>
+            <div class="highlight-box reveal">
+                <ol style="color:#cbd5e1;">
+                    <li><strong style="color:#e2e8f0;">Arquitetura Híbrida:</strong> Use GPT-5.5/Opus 4.8 para raciocínio profundo; Gemini/Llama Scout para contexto longo; MiniMax M2.5 Pro para custo operacional.</li>
+                    <li><strong style="color:#e2e8f0;">Prefira Frameworks com Estado:</strong> LangGraph oferece memória persistente e controle granular para produção; CrewAI é ideal para automação com papéis fixos.</li>
+                    <li><strong style="color:#e2e8f0;">Estratégia de Caching:</strong> Implemente caching de prompt (GPT-5.5 e Opus 4.8) para reduzir latência e custo em padrões repetitivos.</li>
+                    <li><strong style="color:#e2e8f0;">Planeje para Assincronicidade:</strong> Projete agentes com checkpoints e recuperação de estado para execução de longa duração.</li>
+                    <li><strong style="color:#e2e8f0;">Invista em Observabilidade:</strong> Adote plataformas com rastreabilidade nativa (Frontier, Gemini Enterprise) para conformidade e segurança.</li>
+                    <li><strong style="color:#e2e8f0;">Considere Open-Weight para Soberania:</strong> DeepSeek, Llama e Qwen oferecem alternativas viáveis para dados sensíveis e ambientes air-gapped.</li>
+                </ol>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- ========= MODELOS ========= -->
+        <section id="modelos">
+            <h2 class="section-title reveal">
+                <span class="emoji">⚙️</span> 2. Análise Detalhada dos Modelos
+                <span class="accent-line"></span>
+            </h2>
+
+            <!-- OpenAI -->
+            <h3 class="reveal">2.1 OpenAI <span class="badge-lab">GPT-5.5 Family</span></h3>
+            <div class="card-grid reveal">
+                <div class="card">
+                    <h4>GPT-5.5</h4>
+                    <p><strong>Data:</strong> 23/04/2026 (API 24/04) • <span class="badge">Fechado</span></p>
+                    <p><strong>Contexto:</strong> 1,05M tokens (in) / 128K (out)</p>
+                    <p><strong>Modalidades:</strong> Texto + Imagem (in) → Texto (out)</p>
+                    <p><strong>Benchmarks:</strong> GPQA-Diamond 93,6%; HLE (sem ferramentas) 41,4%; HLE Pro 57,2%</p>
+                    <p><strong>Força:</strong> Melhor raciocínio complexo e agentes autônomos.</p>
+                    <p><strong>Fraqueza:</strong> Custo elevado (US$ 5-10/1M in; US$ 30-45/1M out). Sobrecarga em contexto longo.</p>
+                    <p><strong>Custo:</strong> <span class="cost-high">Alto</span> • <strong>Maturidade:</strong> Alta</p>
+                    <p><strong>Uso ideal:</strong> Engenharia de software de ponta, pesquisa aprofundada.</p>
+                </div>
+                <div class="card">
+                    <h4>GPT-5.5 Mini</h4>
+                    <p><strong>Data:</strong> 25/04/2026 • <span class="badge">Fechado</span></p>
+                    <p><strong>Contexto:</strong> 400K tokens</p>
+                    <p><strong>Custo:</strong> US$ 0,75/1K in; US$ 4,50/1K out</p>
+                    <p><strong>Força:</strong> Alternativa econômica e rápida.</p>
+                    <p><strong>Fraqueza:</strong> Raciocínio inferior ao GPT-5.5.</p>
+                    <p><strong>Custo:</strong> <span class="cost-low">Baixo</span> • <strong>Maturidade:</strong> Alta</p>
+                    <p><strong>Uso ideal:</strong> Inferência de baixo custo, monitoramento em tempo real.</p>
+                </div>
+                <div class="card">
+                    <h4>GPT-5.5 Nano</h4>
+                    <p><strong>Data:</strong> 25/04/2026 • <span class="badge">Fechado</span></p>
+                    <p><strong>Contexto:</strong> 400K tokens</p>
+                    <p><strong>Custo:</strong> US$ 0,20/1K in; US$ 1,25/1K out • 230 tokens/s</p>
+                    <p><strong>Força:</strong> Custo ultrabaixo e alta velocidade.</p>
+                    <p><strong>Fraqueza:</strong> Sem visão; capacidade limitada.</p>
+                    <p><strong>Custo:</strong> <span class="cost-low">Muito Baixo</span> • <strong>Maturidade:</strong> Alta</p>
+                    <p><strong>Uso ideal:</strong> Tarefas simples, processamento em lote.</p>
+                </div>
+            </div>
+
+            <!-- Anthropic -->
+            <h3 class="reveal">2.2 Anthropic <span class="badge-lab">Claude</span></h3>
+            <div class="card-grid reveal">
+                <div class="card" style="border-left-color: #a78bfa;">
+                    <h4>Claude Opus 4.8</h4>
+                    <p><strong>Data:</strong> 28/05/2026 • <span class="badge">Fechado</span></p>
+                    <p><strong>Contexto:</strong> 1M tokens</p>
+                    <p><strong>Modalidades:</strong> Áudio, Imagem, Fala, Texto, Vídeo (in/out)</p>
+                    <p><strong>Força:</strong> Melhor para tarefas agentivas e uso de computador.</p>
+                    <p><strong>Fraqueza:</strong> Custo elevado.</p>
+                    <p><strong>Custo:</strong> <span class="cost-high">Alto</span> • <strong>Maturidade:</strong> Alta</p>
+                    <p><strong>Uso ideal:</strong> Engenharia complexa, refatoração de grandes bases.</p>
+                </div>
+                <div class="card" style="border-left-color: #b45309;">
+                    <h4>Claude Sonnet 4.8 <span class="badge badge-warn">Não lançado</span></h4>
+                    <p><strong>⚠️ Atenção:</strong> A versão atual é <strong>Sonnet 4.6</strong> (Fev/2026).</p>
+                    <p><strong>Custo estimado (4.6):</strong> US$ 3/1M in; US$ 15/1M out • <span class="cost-medium">Médio</span></p>
+                    <p><strong>Uso:</strong> Equilíbrio entre custo e desempenho para codificação geral.</p>
+                </div>
+            </div>
+
+            <!-- Google -->
+            <h3 class="reveal">2.3 Google DeepMind <span class="badge-lab">Gemini</span></h3>
+            <div class="card-grid reveal">
+                <div class="card" style="border-left-color: #34d399;">
+                    <h4>Gemini 2.5 Pro</h4>
+                    <p><strong>Data:</strong> Março 2026 (GA) • <span class="badge">Fechado</span></p>
+                    <p><strong>Contexto:</strong> 2M tokens</p>
+                    <p><strong>Modalidades:</strong> Multimodal nativo (texto, imagem, áudio, vídeo, código).</p>
+                    <p><strong>Força:</strong> Maior janela entre fechados e custo acessível.</p>
+                    <p><strong>Fraqueza:</strong> Inferior ao GPT-5.5/Opus 4.8 em codificação agentiva de ponta.</p>
+                    <p><strong>Custo:</strong> <span class="cost-medium">Médio-Baixo</span> • <strong>Maturidade:</strong> Alta</p>
+                    <p><strong>Uso ideal:</strong> RAG corporativo, processamento de documentos extensos.</p>
+                </div>
+                <div class="card" style="border-left-color: #67e8f9;">
+                    <h4>Gemini 3 Flash</h4>
+                    <p><strong>Data:</strong> 20/05/2026 (Google I/O) • <span class="badge">Fechado</span></p>
+                    <p><strong>Força:</strong> 4× mais rápido que líderes atuais. Modelo padrão do Gemini App.</p>
+                    <p><strong>Fraqueza:</strong> Otimizado para velocidade, não para profundidade (Pro previsto Jun/2026).</p>
+                    <p><strong>Custo:</strong> <span class="cost-low">Baixo</span> (gratuito para usuários) • <strong>Maturidade:</strong> Média</p>
+                    <p><strong>Uso ideal:</strong> Agentes autônomos, monitoramento em tempo real.</p>
+                </div>
+            </div>
+
+            <!-- DeepSeek -->
+            <h3 class="reveal">2.4 DeepSeek <span class="badge-lab">Open-Weight</span></h3>
+            <div class="card-grid reveal">
+                <div class="card" style="border-left-color: #f59e0b;">
+                    <h4>DeepSeek-V4</h4>
+                    <p><strong>Data:</strong> 24/04/2026 (Prévia) • <span class="badge badge-alt">Open-weight</span></p>
+                    <p><strong>Contexto:</strong> 1M tokens</p>
+                    <p><strong>Arquitetura:</strong> MoE 1,6T parâmetros (49B ativos) para Pro; 284B (13B ativos) para Flash.</p>
+                    <p><strong>Força:</strong> Compatível com chips Huawei Ascend; foco em soberania.</p>
+                    <p><strong>Fraqueza:</strong> Versão prévia, ecossistema imaturo.</p>
+                    <p><strong>Custo:</strong> <span class="cost-low">Baixo</span> • <strong>Maturidade:</strong> Baixa-Média</p>
+                    <p><strong>Uso ideal:</strong> Deploy on-premises.</p>
+                </div>
+                <div class="card" style="border-left-color: #f59e0b;">
+                    <h4>DeepSeek-R1</h4>
+                    <p><strong>Data:</strong> Atualizações contínuas (Maio/2026) • <span class="badge badge-alt">Open-weight</span></p>
+                    <p><strong>Contexto:</strong> 32K tokens</p>
+                    <p><strong>Benchmarks:</strong> Comparável ao OpenAI o1 em matemática e código.</p>
+                    <p><strong>Força:</strong> Raciocínio de alto nível com custo extremamente baixo.</p>
+                    <p><strong>Custo:</strong> <span class="cost-low">Muito Baixo</span> • <strong>Maturidade:</strong> Média</p>
+                    <p><strong>Uso ideal:</strong> Análise quantitativa, matemática.</p>
+                </div>
+            </div>
+
+            <!-- xAI -->
+            <h3 class="reveal">2.5 xAI <span class="badge-lab">Grok</span></h3>
+            <div class="card reveal">
+                <h4>Grok 4.3</h4>
+                <p><strong>Data:</strong> 30/04/2026 (API) • <span class="badge">Fechado</span></p>
+                <p><strong>Contexto:</strong> 1M tokens • <strong>Modalidades:</strong> Texto e imagem (input).</p>
+                <p><strong>Benchmarks:</strong> Artificial Analysis Index: 53</p>
+                <p><strong>Força:</strong> Preço ~40% menor que Grok 4.20; melhorias agentivas.</p>
+                <p><strong>Fraqueza:</strong> Desempenho inferior aos líderes.</p>
+                <p><strong>Custo:</strong> <span class="cost-medium">Baixo-Médio</span> (US$ 1,25/1M in; US$ 2,50/1M out) • <strong>Maturidade:</strong> Média</p>
+                <p><strong>Uso ideal:</strong> Análise quantitativa com custo controlado.</p>
+            </div>
+
+            <!-- Alibaba -->
+            <h3 class="reveal">2.6 Alibaba <span class="badge-lab">Qwen</span></h3>
+            <div class="card-grid reveal">
+                <div class="card" style="border-left-color: #f472b6;">
+                    <h4>Qwen 3.7 Plus</h4>
+                    <p><strong>Data:</strong> 02/06/2026 • <span class="badge badge-alt">Open-weight</span></p>
+                    <p><strong>Modalidades:</strong> Multimodal (texto, imagem, vídeo, GUI).</p>
+                    <p><strong>Benchmarks:</strong> Vision Arena Top 5 global; #1 na China.</p>
+                    <p><strong>Força:</strong> "Ver, pensar, escrever, fazer, verificar" — opera GUIs e gera código a partir de referências visuais.</p>
+                    <p><strong>Fraqueza:</strong> Ecossistema ocidental imaturo (parceria com Fireworks).</p>
+                    <p><strong>Custo:</strong> <span class="cost-low">Baixo</span> • <strong>Maturidade:</strong> Média</p>
+                    <p><strong>Uso ideal:</strong> Aplicações multimodais, automação com interação GUI.</p>
+                </div>
+                <div class="card" style="border-left-color: #f472b6;">
+                    <h4>Qwen 3.7 Coder <span class="badge badge-warn">Não lançado</span></h4>
+                    <p><strong>⚠️ Atenção:</strong> O modelo mais recente para código é o <strong>Qwen3-Coder-30B-A3B</strong>.</p>
+                </div>
+            </div>
+
+            <!-- Moonshot -->
+            <h3 class="reveal">2.7 Moonshot AI <span class="badge-lab">Kimi</span></h3>
+            <div class="card-grid reveal">
+                <div class="card" style="border-left-color: #c4b5fd;">
+                    <h4>Kimi K2.6</h4>
+                    <p><strong>Data:</strong> 20/04/2026 • <span class="badge badge-alt">Open-source</span></p>
+                    <p><strong>Contexto:</strong> 256K tokens</p>
+                    <p><strong>Arquitetura:</strong> MoE 1T (32B ativos).</p>
+                    <p><strong>Força:</strong> Coordena 300 subagentes em paralelo; execução autônoma de 12 horas.</p>
+                    <p><strong>Custo:</strong> <span class="cost-low">Baixo</span> • <strong>Maturidade:</strong> Média</p>
+                    <p><strong>Uso ideal:</strong> Sistemas multiagentes, automação em larga escala.</p>
+                </div>
+                <div class="card" style="border-left-color: #c4b5fd;">
+                    <h4>Kimi K2.7-Code</h4>
+                    <p><strong>Data:</strong> 12/06/2026 • <span class="badge badge-alt">Open-source</span></p>
+                    <p><strong>Benchmarks:</strong> Melhoria de 21,8% em código; redução de 30% no consumo de tokens.</p>
+                    <p><strong>Força:</strong> HighSpeed Mode com até 6× mais velocidade.</p>
+                    <p><strong>Custo:</strong> <span class="cost-low">Muito Baixo</span> (US$ 0,95/1M in; US$ 4,00/1M out; US$ 0,19 cache hit)</p>
+                    <p><strong>Uso ideal:</strong> Engenharia e refatoração de código.</p>
+                </div>
+            </div>
+
+            <!-- MiniMax -->
+            <h3 class="reveal">2.8 MiniMax <span class="badge-lab">M Series</span></h3>
+            <div class="card-grid reveal">
+                <div class="card" style="border-left-color: #34d399;">
+                    <h4>MiniMax M1</h4>
+                    <p><strong>Data:</strong> 18/04/2026 • <span class="badge badge-alt">Open-source</span></p>
+                    <p><strong>Contexto:</strong> 1M tokens</p>
+                    <p><strong>Arquitetura:</strong> MoE 456B (45,9B ativos). Treinado por US$ 537,4K.</p>
+                    <p><strong>Custo:</strong> <span class="cost-low">Muito Baixo</span> (US$ 0,40/1M in; US$ 2,20/1M out)</p>
+                    <p><strong>Uso ideal:</strong> Pesquisa e deploy on-premises.</p>
+                </div>
+                <div class="card" style="border-left-color: #fbbf24;">
+                    <h4>MiniMax M2.5 Pro</h4>
+                    <p><strong>Data:</strong> 12/02/2026</p>
+                    <p><strong>Benchmarks:</strong> SWE-Bench Verified 37% mais rápido que M2.1.</p>
+                    <p><strong>Força:</strong> Custo 1/10 a 1/20 dos concorrentes; 100 tokens/s.</p>
+                    <p><strong>Custo:</strong> <span class="cost-low">Muito Baixo</span> (US$ 0,30/1M in; US$ 2,40/1M out) • <strong>Maturidade:</strong> Média</p>
+                    <p><strong>Uso ideal:</strong> Automação empresarial com custo ultrabaixo.</p>
+                </div>
+            </div>
+
+            <!-- Meta -->
+            <h3 class="reveal">2.9 Meta <span class="badge-lab">Llama 4</span></h3>
+            <div class="card-grid reveal">
+                <div class="card" style="border-left-color: #60a5fa;">
+                    <h4>Llama 4 Maverick</h4>
+                    <p><strong>Data:</strong> 05/04/2026 • <span class="badge badge-alt">Open-weight</span></p>
+                    <p><strong>Arquitetura:</strong> 17B parâmetros, 128 experts; MoE multimodal.</p>
+                    <p><strong>Força:</strong> Primeira Llama multimodal nativamente.</p>
+                    <p><strong>Custo:</strong> <span class="cost-low">Baixo</span> • <strong>Maturidade:</strong> Média</p>
+                    <p><strong>Uso ideal:</strong> Deploy on-premises multimodal.</p>
+                </div>
+                <div class="card" style="border-left-color: #34d399;">
+                    <h4>Llama 4 Scout</h4>
+                    <p><strong>Data:</strong> 05/04/2026 • <span class="badge badge-alt">Open-weight</span></p>
+                    <p><strong>Contexto:</strong> 10M tokens (a maior do mercado).</p>
+                    <p><strong>Arquitetura:</strong> 17B, 16 experts; roda em um único H100.</p>
+                    <p><strong>Força:</strong> Contexto massivo com hardware mínimo.</p>
+                    <p><strong>Custo:</strong> <span class="cost-low">Muito Baixo</span> • <strong>Maturidade:</strong> Média</p>
+                    <p><strong>Uso ideal:</strong> Processamento de contexto ultralongo, RAG massivo.</p>
+                </div>
+            </div>
+
+            <!-- Zhipu -->
+            <h3 class="reveal">2.10 Zhipu AI <span class="badge-lab">GLM</span></h3>
+            <div class="card reveal">
+                <h4>GLM 4.7</h4>
+                <p><strong>Data:</strong> 20/01/2026 (GLM-4.7-Flash) • <span class="badge badge-alt">Open-source</span></p>
+                <p><strong>Contexto:</strong> 200K tokens • <strong>Arquitetura:</strong> 30B total, 3B ativos (leve).</p>
+                <p><strong>Custo:</strong> <span class="cost-low">Muito Baixo</span> (US$ 1,00/1M in; US$ 3,20/1M out) • <strong>Maturidade:</strong> Média</p>
+                <p><strong>Uso ideal:</strong> Deploy com recursos limitados.</p>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- ========= SISTEMAS AGENTIVOS ========= -->
+        <section id="agentes">
+            <h2 class="section-title reveal">
+                <span class="emoji">🤖</span> 3. Sistemas Agentivos e LAMs
+                <span class="accent-line"></span>
+            </h2>
+            <div class="table-wrap reveal">
+                <table>
+                    <thead><tr><th>Sistema</th><th>Laboratório</th><th>Diferencial Principal</th><th>Maturidade</th><th>Observação</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong style="color:#60a5fa;">Manus</strong></td><td>Meta</td><td>Agente generalista (ponta a ponta)</td><td><span class="cost-medium">Média</span></td><td>Integrado ao Telegram; versão 1.6 Max para raciocínio.</td></tr>
+                        <tr><td><strong style="color:#60a5fa;">OpenAI Agents</strong></td><td>OpenAI</td><td>SDK + Workspace Agents; Frontier governance</td><td><span class="cost-high">Alta</span></td><td>Split harness/ambiente; padrão para governança.</td></tr>
+                        <tr><td><strong style="color:#a78bfa;">Claude Code</strong></td><td>Anthropic</td><td>Auto Mode com verificações em segundo plano</td><td><span class="cost-high">Alta</span></td><td>Executa tarefas de trimestres em dias.</td></tr>
+                        <tr><td><strong style="color:#67e8f9;">Gemini Agents</strong></td><td>Google</td><td>Spark (24/7) + Enterprise Agent Platform</td><td><span class="cost-high">Alta</span></td><td>Agentes com identidade e rastreabilidade.</td></tr>
+                        <tr><td><strong style="color:#f472b6;">AutoGen</strong></td><td>Microsoft</td><td>Framework conversacional multiagente</td><td><span class="cost-medium">Média</span></td><td>v0.4+; AG2 é continuação comunitária.</td></tr>
+                        <tr><td><strong style="color:#34d399;">LangGraph</strong></td><td>LangChain</td><td>Controle granular (grafos), checkpoints</td><td><span class="cost-high">Alta</span></td><td>1B+ downloads; usado por Replit/Uber.</td></tr>
+                        <tr><td><strong style="color:#fbbf24;">CrewAI</strong></td><td>CrewAI</td><td>Role-based, leve, independente</td><td><span class="cost-medium">Média-Alta</span></td><td>Discovery com matching multi-sinal.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- ========= MATRIZ ========= -->
+        <section id="matriz">
+            <h2 class="section-title reveal">
+                <span class="emoji">📋</span> 4. Matriz de Assimetria Tática
+                <span class="accent-line"></span>
+            </h2>
+            <div class="table-wrap reveal">
+                <table>
+                    <thead><tr><th>Natureza da Tarefa</th><th>Modelo Líder Ideal</th><th>Métrica Crítica de Escolha</th><th>Modelo Alternativo / Plano B</th><th>Custo Relativo</th><th>Observações Operacionais</th></tr></thead>
+                    <tbody>
+                        <tr><td>Eng. Software Complexa</td><td><strong style="color:#a78bfa;">Claude Opus 4.8</strong></td><td>SWE-bench / Precisão agentiva</td><td>GPT-5.5</td><td><span class="cost-high">Alto</span></td><td>Opus otimizado para codificação; GPT-5.5 robusto.</td></tr>
+                        <tr><td>Refatoração de Código</td><td><strong style="color:#a78bfa;">Claude Opus 4.8</strong></td><td>Janela 1M + precisão</td><td>Kimi K2.7-Code</td><td><span class="cost-high">Alto</span> → <span class="cost-low">Muito Baixo</span></td><td>K2.7 reduz 30% tokens de raciocínio.</td></tr>
+                        <tr><td>Agentes Autônomos</td><td><strong style="color:#60a5fa;">GPT-5.5</strong></td><td>Uso de ferramentas + MCP</td><td>Claude Opus 4.8</td><td><span class="cost-high">Alto</span></td><td>Ambos suportam computer use.</td></tr>
+                        <tr><td>RAG Corporativo</td><td><strong style="color:#34d399;">Gemini 2.5 Pro</strong></td><td>Janela de 2M tokens</td><td>Llama 4 Scout</td><td><span class="cost-medium">Médio-Baixo</span> → <span class="cost-low">Muito Baixo</span></td><td>Scout tem 10M tokens (contexto bruto).</td></tr>
+                        <tr><td>Pesquisa Profunda</td><td><strong style="color:#60a5fa;">GPT-5.5</strong></td><td>GPQA-Diamond (93,6%)</td><td>Claude Opus 4.8</td><td><span class="cost-high">Alto</span></td><td>Referência em raciocínio científico.</td></tr>
+                        <tr><td>Assistentes Executivos</td><td><strong style="color:#67e8f9;">Gemini Agents (Spark)</strong></td><td>Execução 24/7 em nuvem</td><td>Manus (Meta)</td><td><span class="cost-medium">Médio</span> → <span class="cost-low">Baixo</span></td><td>Spark opera mesmo offline local.</td></tr>
+                        <tr><td>Contexto Ultralongo</td><td><strong style="color:#34d399;">Llama 4 Scout</strong></td><td>10M tokens em H100</td><td>Gemini 2.5 Pro</td><td><span class="cost-low">Muito Baixo</span> → <span class="cost-medium">Médio-Baixo</span></td><td>Scout é revolucionário para hardware limitado.</td></tr>
+                        <tr><td>Inferência Baixo Custo</td><td><strong style="color:#fbbf24;">MiniMax M2.5 Pro</strong></td><td>US$ 0,30/1M input</td><td>GPT-5.5 Nano</td><td><span class="cost-low">Muito Baixo</span></td><td>Custo 1/20 dos líderes.</td></tr>
+                        <tr><td>Monitoramento Tempo Real</td><td><strong style="color:#67e8f9;">Gemini 3 Flash</strong></td><td>4× mais rápido</td><td>MiniMax M2.5 Pro</td><td><span class="cost-low">Baixo</span></td><td>Ideal para latência crítica.</td></tr>
+                        <tr><td>Análise Quantitativa</td><td><strong style="color:#f59e0b;">DeepSeek-R1</strong></td><td>Raciocínio comparável ao o1</td><td>Grok 4.3</td><td><span class="cost-low">Muito Baixo</span> → <span class="cost-medium">Médio</span></td><td>R1 excelente para matemática.</td></tr>
+                        <tr><td>Aplicações Multimodais</td><td><strong style="color:#f472b6;">Qwen 3.7 Plus</strong></td><td>Top 5 Vision Arena</td><td>Llama 4 Maverick</td><td><span class="cost-low">Baixo</span></td><td>Qwen opera GUIs; Maverick multimodal nativo.</td></tr>
+                        <tr><td>Deploy On-Premises</td><td><strong style="color:#f59e0b;">DeepSeek-V4</strong></td><td>Open-weight + 1M contexto</td><td>Llama 4 Scout</td><td><span class="cost-low">Baixo</span></td><td>V4 compatível com Ascend (soberania).</td></tr>
+                        <tr><td>Automação Empresarial</td><td><strong style="color:#fbbf24;">CrewAI</strong></td><td>Framework role-based + Discovery</td><td>OpenAI Agents</td><td><span class="cost-low">Gratuito</span> → <span class="cost-medium">Médio</span></td><td>CrewAI para agilidade; OpenAI para governança.</td></tr>
+                        <tr><td>Sistemas Multiagentes</td><td><strong style="color:#c4b5fd;">Kimi K2.6</strong></td><td>300 subagentes paralelos</td><td>LangGraph</td><td><span class="cost-low">Baixo</span></td><td>K2.6 para enxames; LangGraph para controle fino.</td></tr>
+                        <tr><td>Aplicações Multilíngues</td><td><strong style="color:#60a5fa;">GPT-5.5</strong></td><td>Suporte nativo global</td><td>Gemini 2.5 Pro</td><td><span class="cost-high">Alto</span> → <span class="cost-medium">Médio-Baixo</span></td><td>Ambos com forte suporte multilíngue.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- ========= FINAL ========= -->
+        <section id="final">
+            <h2 class="section-title reveal">
+                <span class="emoji">🎯</span> 5. Considerações Finais e Governança
+                <span class="accent-line"></span>
+            </h2>
+            <div class="reveal">
+                <p style="font-size:1.05rem; color:#cbd5e1;">O cenário atual exige que arquitetos de IA abandonem a visão monolítica de "um modelo para tudo". A estratégia vencedora para 2026/2027 é a <strong style="color:#e2e8f0;">Orquestração Cognitiva Híbrida</strong>:</p>
+                <ul style="color:#cbd5e1; margin-left:1.5rem; margin-top:1rem;">
+                    <li><strong style="color:#e2e8f0;">Para Cognição (Pensar):</strong> GPT-5.5 ou Claude Opus 4.8.</li>
+                    <li><strong style="color:#e2e8f0;">Para Ação (Fazer):</strong> Claude Opus 4.8, Qwen 3.7 Plus ou GPT-5.5 (via MCP/Computer Use).</li>
+                    <li><strong style="color:#e2e8f0;">Para Memória (Contexto):</strong> Llama 4 Scout ou Gemini 2.5 Pro.</li>
+                    <li><strong style="color:#e2e8f0;">Para Escala (Custo):</strong> MiniMax M2.5 Pro e Kimi K2.7-Code.</li>
+                </ul>
+                <p style="margin-top:1.2rem; color:#cbd5e1;"><strong style="color:#e2e8f0;">Governança e Observabilidade</strong> não são mais opcionais. Plataformas como OpenAI Frontier e Gemini Enterprise fornecem a rastreabilidade necessária para ambientes regulados. Para ambientes com restrições de soberania de dados, o ecossistema open-weight (especialmente Llama 4, DeepSeek-V4 e Qwen) atingiu um nível de maturidade que permite substituições viáveis sem perda catastrófica de desempenho em casos de uso específicos.</p>
+            </div>
+            <div class="highlight-box reveal">
+                <p><strong style="color:#e2e8f0;">Recomendação Final:</strong> Implemente um gateway de roteamento inteligente que direcione cada subtarefa para o modelo/sistema especializado, utilize frameworks com checkpoint de estado (LangGraph) e adote caching de prompt para otimização de custos. O diferencial competitivo nos próximos 12 meses estará na <strong style="color:#e2e8f0;">arquitetura de orquestração</strong>, não no modelo individual.</p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <p style="display: flex; justify-content: center; gap: 0.8rem; flex-wrap: wrap;">
+                <span>© 2026 — Manual de Orquestração Cognitiva</span>
+                <span style="opacity:0.3;">|</span>
+                <span>Dados baseados em fontes públicas até 16 de junho de 2026</span>
+                <span style="opacity:0.3;">|</span>
+                <span style="color:#3b82f6;">✦ Fronteira IA</span>
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        // Barra de Progresso
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        });
+
+        // Scroll Reveal com Intersection Observer
+        document.addEventListener('DOMContentLoaded', () => {
+            const reveals = document.querySelectorAll('.reveal');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -30px 0px'
+            });
+
+            reveals.forEach(el => observer.observe(el));
+
+            // Verifica elementos já visíveis no carregamento
+            reveals.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight) {
+                    el.classList.add('visible');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
